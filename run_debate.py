@@ -1,3 +1,6 @@
+import argparse
+import random
+
 from nodes.user_input_node import user_input_node
 from nodes.coordinator_node import rounds_controller_node
 from nodes.memory_node import update_memory_node, get_agent_memory_slice
@@ -7,10 +10,26 @@ from nodes.judge_node import judge_node
 
 def main():
     # -----------------------------
-    # Initialize state via CLI
+    # CLI arguments
+    # -----------------------------
+    parser = argparse.ArgumentParser(description="Multi-Agent Debate System")
+    parser.add_argument(
+        "--seed",
+        type=int,
+        default=None,
+        help="Optional random seed for deterministic behavior"
+    )
+    args = parser.parse_args()
+
+    if args.seed is not None:
+        random.seed(args.seed)
+
+    # -----------------------------
+    # Initialize state
     # -----------------------------
     state = {}
     state = user_input_node(state)
+    state["seed"] = args.seed
 
     # -----------------------------
     # Run exactly 8 debate rounds
@@ -19,13 +38,10 @@ def main():
         agent = "AgentA" if state["current_round"] % 2 == 1 else "AgentB"
         persona = "Scientist" if agent == "AgentA" else "Philosopher"
 
-        # Enforce turn order
         rounds_controller_node(state, agent)
 
-        # Provide selective memory
         memory_slice = get_agent_memory_slice(state, agent)
 
-        # Generate agent argument
         result = agent_node(
             agent_name=agent,
             persona=persona,
@@ -34,7 +50,6 @@ def main():
             round_number=state["current_round"]
         )
 
-        # Update memory
         state = update_memory_node(
             state,
             result["agent"],
@@ -42,14 +57,12 @@ def main():
             result["meta"]
         )
 
-        # CLI output per round
         print(f"[Round {state['current_round']}] {agent}: {result['text']}")
 
-        # Advance round
         state["current_round"] += 1
 
     # -----------------------------
-    # Judge evaluates the debate
+    # Judge evaluation
     # -----------------------------
     state = judge_node(state)
 

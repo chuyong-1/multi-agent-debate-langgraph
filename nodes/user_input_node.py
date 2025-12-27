@@ -1,12 +1,8 @@
 import re
 from typing import Dict, Any
 
-def user_input_node(state: Dict[str, Any]) -> Dict[str, Any]:
-    """
-    Accepts debate topic from CLI, validates it,
-    sanitizes content, and initializes debate state.
-    """
 
+def user_input_node(state: Dict[str, Any]) -> Dict[str, Any]:
     topic = input("Enter topic for debate: ").strip()
 
     if len(topic) < 10 or len(topic) > 200:
@@ -24,5 +20,4 @@ def user_input_node(state: Dict[str, Any]) -> Dict[str, Any]:
     state["winner"] = None
 
     print(f"\nStarting debate on topic: {topic}\n")
-
     return state
