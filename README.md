@@ -128,10 +128,3 @@ Machine Learning Intern Candidate
 
 
 ---
-
-## 3️⃣ Commit README (FINAL REQUIRED COMMIT)
-
-```powershell
-git add README.md
-git commit -m "Add README with setup, usage, and architecture documentation"
-git push origin main
