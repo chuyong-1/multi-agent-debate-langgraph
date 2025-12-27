@@ -7,33 +7,39 @@ def main():
     state = {}
     state = user_input_node(state)
 
-    # Round 1 — AgentA
-    rounds_controller_node(state, "AgentA")
-    mem_slice = get_agent_memory_slice(state, "AgentA")
-    result = agent_node(
-        agent_name="AgentA",
-        persona="Scientist",
-        topic=state["topic"],
-        memory_slice=mem_slice,
-        round_number=state["current_round"]
-    )
-    state = update_memory_node(state, result["agent"], result["text"], result["meta"])
-    print("AgentA output:", result)
+    while state["current_round"] <= state["max_rounds"]:
+        agent = "AgentA" if state["current_round"] % 2 == 1 else "AgentB"
+        persona = "Scientist" if agent == "AgentA" else "Philosopher"
 
-    state["current_round"] += 1
+        # Enforce turn
+        rounds_controller_node(state, agent)
 
-    # Round 2 — AgentB
-    rounds_controller_node(state, "AgentB")
-    mem_slice = get_agent_memory_slice(state, "AgentB")
-    result = agent_node(
-        agent_name="AgentB",
-        persona="Philosopher",
-        topic=state["topic"],
-        memory_slice=mem_slice,
-        round_number=state["current_round"]
-    )
-    state = update_memory_node(state, result["agent"], result["text"], result["meta"])
-    print("AgentB output:", result)
+        # Get selective memory
+        memory_slice = get_agent_memory_slice(state, agent)
+
+        # Generate argument
+        result = agent_node(
+            agent_name=agent,
+            persona=persona,
+            topic=state["topic"],
+            memory_slice=memory_slice,
+            round_number=state["current_round"]
+        )
+
+        # Store in memory
+        state = update_memory_node(
+            state,
+            result["agent"],
+            result["text"],
+            result["meta"]
+        )
+
+        print(f"[Round {state['current_round']}] {agent}: {result['text']}")
+
+        # Advance round
+        state["current_round"] += 1
+
+    print("\nDebate finished.\n")
 
 if __name__ == "__main__":
     main()
